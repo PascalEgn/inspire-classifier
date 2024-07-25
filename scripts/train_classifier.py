@@ -13,6 +13,7 @@ def train_classifier(
     os.makedirs(os.path.join(os.getcwd(), "classifier", "data"), exist_ok=True)
 
     df = pd.read_pickle(text_path)
+    df["text"] = df["inspire_categories"].str.join(",") + " <ENDCATEGORIES> " + df["text"]
     df = df.sample(frac=1, random_state=42).reset_index(drop=True)
     print(df["label"].value_counts())
     train_size = round(min(df["label"].value_counts()) * train_test_split)
@@ -44,7 +45,7 @@ def train_classifier(
     print("categories: ")
     print(test_df["label"].value_counts())
     print("-----------------")
-
+    
     os.system(
         f"inspire-classifier train -b classifier --classifier-epochs {number_of_classifier_epochs} --language-model-epochs {number_of_lanuage_model_epochs}"
     )
@@ -55,12 +56,12 @@ def train_classifier(
 
 
 # Adjust necessary data
-NUMBER_OF_CLASSIFIER_EPOCHS = 10
-NUMBER_OF_LANGUAGE_MODEL_EPOCHS = 10
+NUMBER_OF_CLASSIFIER_EPOCHS = 5
+NUMBER_OF_LANGUAGE_MODEL_EPOCHS = 5
 TRAIN_TEST_SPLIT = 0.8
 
 train_classifier(
-    os.path.join(os.getcwd(), "inspire_classifier_dataset.pkl"),
+    os.path.join(os.getcwd(), "inspire_classifier_dataset_2021-10-01_2025-12-31.pkl"),
     TRAIN_TEST_SPLIT,
     NUMBER_OF_CLASSIFIER_EPOCHS,
     NUMBER_OF_LANGUAGE_MODEL_EPOCHS,
