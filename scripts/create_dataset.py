@@ -73,7 +73,7 @@ class InspireClassifierSearch(object):
             self.id_field = "id"
             self.title_field = "metadata.titles[0].title"
             self.abstract_field = "metadata.abstracts[0].value"
-            self.inspire_categories_field = "metadata.inspire_categories.term"
+            self.inspire_categories_field = "metadata.inspire_categories"
             self.query_filters = [
                 query_filters
                 & Q(
@@ -89,7 +89,7 @@ class InspireClassifierSearch(object):
             self.id_field = "id"
             self.title_field = "titles[0].title"
             self.abstract_field = "abstracts[0].value"
-            self.inspire_categories_field = "inspire_categories.term"
+            self.inspire_categories_field = "inspire_categories"
             self.query_filters = [
                 query_filters
                 & Q("range", _created={"gte": f"{self.year_from}-{self.month_from}",
@@ -100,12 +100,18 @@ class InspireClassifierSearch(object):
         id = get_value(record_data, self.id_field)
         title = get_value(record_data, self.title_field)
         abstract = get_value(record_data, self.abstract_field)
-        inspire_categories = get_value(record_data, self.inspire_categories_field, [])
+        inspire_categories_dict = get_value(record_data, self.inspire_categories_field, [])
+        inspire_categories = []
+        category_sources = []
+        for category in inspire_categories_dict:
+            inspire_categories.append(category.get("term"))
+            category_sources.append(category.get("source", None))
         return {
             "id": int(id),
             "title": title,
             "abstract": abstract,
             "inspire_categories": inspire_categories,
+            "category_sources": category_sources,
         }
 
     def get_decision_query(self):
@@ -143,7 +149,7 @@ def prepare_inspire_classifier_dataset(data, save_data_path):
     inspire_data_df["text"] = (
         inspire_data_df["title"] + " <ENDTITLE> " + inspire_data_df["abstract"]
     )
-    inspire_classifier_data_df = inspire_data_df[["id", "inspire_categories", "label", "text"]]
+    inspire_classifier_data_df = inspire_data_df[["id", "inspire_categories", "category_sources", "label", "text"]]
     inspire_classifier_data_df.to_pickle(save_data_path)
 
 
