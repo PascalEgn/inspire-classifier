@@ -23,12 +23,15 @@
 import json
 from math import isclose
 
+import pytest
+
 
 def test_health_check(app_client):
     assert app_client.get("/api/health").status_code == 200
 
 
-def test_classifier_accepts_only_post(app_client, trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_classifier_accepts_only_post(app_client):
     assert (
         app_client.post(
             "/api/predict/coreness",
@@ -39,7 +42,8 @@ def test_classifier_accepts_only_post(app_client, trained_pipeline):
     assert app_client.get("/api/predict/coreness").status_code == 405
 
 
-def test_classifier(app_client, trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_classifier(app_client):
     response = app_client.post(
         "/api/predict/coreness", json=dict(title="foo bar", abstract="foobar foobar")
     )
@@ -59,7 +63,8 @@ def test_classifier(app_client, trained_pipeline):
     )
 
 
-def test_classifier_serializes_input(app_client, trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_classifier_serializes_input(app_client):
     assert (
         app_client.post("/api/predict/coreness", json=dict(title="foo bar")).status_code
         == 422
@@ -72,7 +77,8 @@ def test_classifier_serializes_input(app_client, trained_pipeline):
     )
 
 
-def test_classifier_doesnt_accept_extra_fields(app_client, trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_classifier_doesnt_accept_extra_fields(app_client):
     assert (
         app_client.post(
             "/api/predict/coreness",

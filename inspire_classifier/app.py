@@ -28,13 +28,13 @@ from marshmallow import fields
 from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 from webargs.flaskparser import use_args
 
+from inspire_classifier import serializers
 from inspire_classifier.api import initialize_classifier, predict_coreness
-
-from . import serializers
 
 
 class JsonResponse(Response):
-    """ "By creaitng this Response class, we force the response to always be in json, getting rid of the jsonify function."""
+    """ "By creaitng this Response class,
+    we force the response to always be in json, getting rid of the jsonify function."""
 
     @classmethod
     def force_type(cls, rv, environ=None):
@@ -56,11 +56,15 @@ def create_app():
     app.config.from_object("inspire_classifier.config")
     app.config.from_pyfile("classifier.cfg", silent=True)
     with app.app_context():
-        classifier = initialize_classifier()
+        try:
+            classifier = initialize_classifier()
+        except IOError:
+            logging.error("Failed to initialize the classifier")
 
     @app.route("/api/health")
     def date():
-        """Basic endpoint that returns the date, used to check if everything is up and working."""
+        """Basic endpoint that returns the date,
+        used to check if everything is up and working."""
         now = datetime.datetime.now()
         return jsonify(now)
 

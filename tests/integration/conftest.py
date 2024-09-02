@@ -25,12 +25,11 @@ from pathlib import Path
 
 import pytest
 from fastai.text.all import Learner
-from mock import patch
-
+from unittest.mock import patch
+import os
 from inspire_classifier.api import create_directories, train
 from inspire_classifier.app import create_app
 from inspire_classifier.utils import path_for
-
 
 @pytest.fixture(autouse=True, scope="session")
 def app():
@@ -55,8 +54,10 @@ class Mock_Learner(Learner):
     """
     Mocks the fit method of the Learner.
 
-    This is done to reduce the model training time during testing by making the fit run once (as opposed to 2 times and
-    3 times for the LanguageModel and Classifier respectively). It stores the result of the first run and then returns
+    This is done to reduce the model training time during testing by
+    making the fit run once (as opposed to 2 times and
+    3 times for the LanguageModel and Classifier respectively).
+    It stores the result of the first run and then returns
     the same result for the other times fit is run.
     """
 
@@ -70,7 +71,7 @@ class Mock_Learner(Learner):
 
 @pytest.fixture(scope="session")
 @patch("fastai.text.learner.text_classifier_learner", Mock_Learner)
-def trained_pipeline(app, tmp_path_factory):
+def _trained_pipeline(app, tmp_path_factory):
     app.config["CLASSIFIER_BASE_PATH"] = tmp_path_factory.getbasetemp()
     create_directories()
     shutil.copy(

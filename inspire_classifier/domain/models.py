@@ -124,8 +124,10 @@ class Classifier:
         self,
         dropout_multiplier=0.5,
         weight_decay=1e-6,
-        learning_rates=np.array([1e-4, 1e-4, 1e-4, 1e-3, 1e-2]),
+        learning_rates=None,
     ):
+        if learning_rates is None:
+            learning_rates = np.array([0.0001, 0.0001, 0.0001, 0.001, 0.01])
         self.learner = text_classifier_learner(
             self.dataloader,
             AWD_LSTM,
